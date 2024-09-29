@@ -14,7 +14,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "manage.py"
+      "dest": "alicebot/wsgi.py"
     }
   ],
   "env": {
