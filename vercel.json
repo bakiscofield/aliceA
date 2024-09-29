@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "manage.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "50mb" }
+    },
+    {
+      "src": "staticfiles/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "manage.py"
+    }
+  ],
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "alicebot.settings",
+    "SECRET_KEY": "@django-secret-key",
+    "DEBUG": "true",
+    "ALLOWED_HOSTS": ".vercel.app"
+  }
+}
+
