@@ -1,0 +1,398 @@
+<script>
+    // alert( window.location.origin);
+    // console.log(window.location);
+    const BASE_ORIGIN = window.location.origin;
+    const API_BASE_ENDPOINT = BASE_ORIGIN+"/api/";
+    const WEB_BASE_ENDPOINT = BASE_ORIGIN+"/web/";
+
+
+    const CAISSES_BASE_ENDPOINT = API_BASE_ENDPOINT+"employee_payement_methodes";
+    const CAISSES_BY_PM_BASE_ENDPOINT = CAISSES_BASE_ENDPOINT+"/by/payement/methodes";
+    const CAISSES_GET_ENDPOINT = CAISSES_BASE_ENDPOINT+"/get";
+    const CAISSES_CREATE_ENDPOINT = CAISSES_BASE_ENDPOINT+"/create";
+    const CAISSES_UPDATE_ENDPOINT = CAISSES_BASE_ENDPOINT+"/update";
+    const CAISSES_DELETE_ENDPOINT = CAISSES_BASE_ENDPOINT+"/delete";
+    
+    const CAISSES_CREATE_OR_EDIT_ENDPOINT = WEB_BASE_ENDPOINT+"caisses/create/or/edit";
+
+    const modal_form_tag = $("#create_or_edit"); 
+    const modal_form = new bootstrap.Modal(modal_form_tag); 
+
+    const btn_add_tag = $("#btn_add"); 
+     
+    const csrftoken = getCookie('csrftoken');
+
+    function generateActionMenu(id) {
+        return `
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle  " type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                    Actions
+                </button>
+                <ul class="dropdown-menu  dropdown-menu-end p-2" aria-labelledby="dropdownMenuButton2">
+                    <li>
+                        <a href="#" 
+                            onclick="show_edit_form(${id})">
+                            <i class="icofont-edit text-success"></i>
+                            <span>Editer</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                            onclick="show_dialog_delete_object(${id})">
+                            <i class="icofont-ui-delete text-danger"></i>
+                            <span>Supprimer</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        `;
+    }
+
+    let datatable = function () {
+        // Variables partagées
+        let table;
+        let dt;
+
+        // Fonctions privées
+        let initDatatable = function (_payement_method_id) {
+            dt = $("#model_data").DataTable();
+            $.ajax({
+                url: `${CAISSES_BY_PM_BASE_ENDPOINT}/${_payement_method_id}`,
+                type: 'get',
+                dataType: 'json',
+                success: function (caisses) {
+                    console.log(caisses);
+                    caisses.forEach(function (caisse) {
+                        let new_row = dt.row.add([
+                            caisse.employee,
+                            caisse.code_agent,
+                            caisse.frais_depot,
+                            caisse.etablissement,
+                            caisse.rue,
+                            caisse.ville,
+                            caisse.payment_method,
+                            generateActionMenu(caisse.id),
+                        ]).draw().node();
+                    });
+                },
+            })
+        }
+
+        let refreshDataTable = function(_payement_method_id) {
+            dt.clear().draw();
+            initDatatable(_payement_method_id);
+        }
+
+        // Suppression de ligne
+        var handleSearchDatatable = function () {
+            $('#input_table_filter').on('keyup', function (e) {
+                dt.search(e.target.value).draw();
+            });
+        }
+
+        // Méthodes publiques
+        return {
+            init: function (_payement_method_id) {
+                initDatatable(_payement_method_id);
+                handleSearchDatatable();
+            },
+            refresh: function (_payement_method_id) {                
+                refreshDataTable(_payement_method_id);
+            }
+        }
+    }();
+
+    window.onload = () => {
+        let current_payement_method_tag = $(".payement_method")[0]; 
+        current_payement_method_tag.classList.add("active");
+        datatable.init(current_payement_method_tag.id);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    btn_add_tag.on('click', () => {
+        $.ajax({
+            url: CAISSES_CREATE_OR_EDIT_ENDPOINT,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: () => {
+                modal_form.hide();
+            },
+            success: function (data) {
+                modal_form_tag.find(".modal-content").html(data.html_form);
+                modal_form.show();
+                store_or_update_object(CAISSES_CREATE_OR_EDIT_ENDPOINT);
+            }
+        });
+    });
+
+    function store_or_update_object(url){
+        let form = modal_form_tag.find("form");
+        form.on('submit', ()=>{
+            stopEvent();   
+            $.ajax({
+                url: url,
+                type: form.attr("method"),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    stopEvent(); 
+                    if (data.form_is_valid){
+                        if ("message" in data) {
+                            datatable.refresh();
+                            let icon = "success";
+                            let title = "Succès";
+                            let message = data["message"];
+                            modal_form.hide();
+                            showDialog(icon, title, message);
+                        }
+                    } else {
+                        modal_form_tag.find(".modal-content").html(data.html_form);
+                        store_or_update_object(url);
+                    }
+                }
+            });
+        
+        })
+    }
+    
+    function show_edit_form(id){
+        let url = CAISSES_CREATE_OR_EDIT_ENDPOINT+"/"+id;
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: () => {
+                modal_form.hide();
+            },
+            success: function (data) {
+                modal_form_tag.find(".modal-content").html(data.html_form);
+                modal_form.show();
+                store_or_update_object(url);
+            }
+        });
+    }
+
+    function show_dialog_delete_object(id, object_message){
+        let title = "Êtes vous sur !";
+        let message = "Vous voulez vraiment supprimer cette caisse ?";
+
+        Swal.fire({
+            icon: "warning",
+            title: title,
+            text: message,
+            showConfirmButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonColor: "#F8285A",
+        }).then((response) => {
+            if (response.isConfirmed) {
+                url = CAISSES_DELETE_ENDPOINT+"/"+id
+                request_config = {
+                    url: url,
+                    method: "DELETE",
+                    data: {},
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                }
+                make_request(request_config);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    function update_list(_payement_method_id){
+        let current_payement_method_tag = $("#"+_payement_method_id)[0];   
+        datatable.refresh(_payement_method_id);
+        let payement_method_tags = $(".payement_method"); 
+        payement_method_tags.each(function(){
+            $(this)[0].classList.remove("active");
+        });
+        current_payement_method_tag.classList.add("active");
+    }
+
+    function make_request({url, method, data, headers}){
+        $.ajax({
+            url: url,
+            type: method,
+            dataType: 'json',
+            headers: headers,
+            success: (data) => {
+                let icon = data.icon;
+                let title = data.title;
+                let message =  data.message;
+                
+                let current_payement_method_tag = $(".payement_method.active")[0]; 
+                                
+                
+                update_list(current_payement_method_tag.id);
+                
+                showDialog(icon, title, message);
+            },
+            error: (xhr, status, error) => {
+                console.log(xhr?.responseJSON);
+
+                let data = xhr?.responseJSON;
+
+                if (data != null || data !== undefined) {
+                    let icon = data.icon;
+                    let title = data.title;
+                    let message =  data.message;
+                    showDialog(icon, title, message);
+                }
+            }
+        });        
+    }
+
+</script>
+
+
+<!-- <script>
+
+    function generateActionMenu(id) {
+        return `<div class="d-flex">
+                    <div class="menu-item px-3">
+                        <a href="#" onclick="edit_object(${id})" class="btn btn-sm btn-success px-3">
+                        <span><i class="far fa-edit"></i></span>
+                        </a>
+                    </div>
+                    <div class="menu-item px-3">
+                        <a href="#" onclick="show_dialog_delete_object(${id}, '')" class="btn btn-sm btn-danger px-3">
+                        <span><i class="far fa-trash-alt fa-lg"></i></span>
+                        </a>
+                    </div>
+                </div>`;
+    }
+
+
+    $(`#create_modal`).on('click', function () {
+        $.ajax({
+            url: `${create_url}`,
+            type: 'get',
+            dataType: 'json',
+            beforeSend: function () {
+                modal_form_object.show();
+            },
+            success: function (data) {
+                $(modal_content).html(data.html_form);
+                store_or_update_object(create_url);
+            }
+        });
+    });
+
+    function upload_object(){
+        $(`#form_upload`).on('submit', function () {
+            stopEvent();
+            let form = $(this);
+            let formData = new FormData(form[0]); 
+            console.log("submit");
+            $.ajax({
+                url: form.attr('action'),
+                type: form.attr("method"),
+                data: formData,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    console.log("Hello");
+                    if ("message" in data) {
+                        datatable.refresh();
+                        let icon = "success";
+                        let title = "Succès";
+                        let message = data["message"];
+                        modal_export_data.hide();
+                        showDialog(icon, title, message);
+                    } else if ("error" in data){
+                        let icon = "error";
+                        let title = "Error";
+                        let message = data["error"];
+                        showDialog(icon, title, message);
+                    }
+                    stopEvent();
+                }
+            });
+        });
+    }
+
+    upload_object();
+
+    function edit_object(id){
+        let tmp_update_url = `${update_url}${id}/`;
+        $.ajax({
+            url: `${tmp_update_url}`,
+            type: 'get',
+            dataType: 'json',
+            beforeSend: function () {
+                modal_form_object.show();
+            },
+            success: function (data) {
+                $(modal_content).html(data.html_form);
+                store_or_update_object(tmp_update_url);
+            }
+        });
+    }
+
+    function store_or_update_object(url){
+        console.log($(`#form`));
+        $(`#form`).on('submit', function () {
+            stopEvent();
+            let form = $(this);
+            $.ajax({
+                url: url,
+                type: form.attr("method"),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.form_is_valid){
+                        if ("message" in data) {
+                            datatable.refresh();
+                            let icon = "success";
+                            let title = "Succès";
+                            let message = data["message"];
+                            modal_form_object.hide();
+                            showDialog(icon, title, message);
+                        }
+                    } else {
+                        $(modal_content).html(data.html_form);
+                        store_or_update_object(create_url);
+                        if ("error" in data){
+                            let icon = "error";
+                            let title = "Error";
+                            let message = data["error"];
+                            showDialog(icon, title, message);
+                        }
+                    }
+                    stopEvent();
+                }
+            });
+        });
+    }
+
+   
+    function showDialog(icon, title, message){
+        Swal.fire({
+            icon: icon,
+            title: title.toUpperCase(),
+            text: message,
+            confirmButtonColor: "#5179d6",
+        });
+    }
+
+   
+
+</script> -->

@@ -1,0 +1,182 @@
+ {% extends 'layouts/base.html' %} 
+{% load static %}
+{% block conteneur %}
+<main class="">
+    <div class="row mb-3">
+        <a class="col-md-6" href="">
+            <div class="card px-4 rounded-pill">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h1 class="font-weight-bold">Employés</h1>
+                    <h2 class="font-weight-bold"> {{ employes_count }} </h2>
+                </div>
+            </div>
+        </a>
+
+        <a class="col-md-6 " href="">
+            <div class="card px-4 rounded-pill">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h1 class="font-weight-bold">Clients</h1>
+                    <h2 class="font-weight-bold"> {{ clients_count }} </h2>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="row mt-5 mb-5">
+        <div class="col-md-4 mb-5">
+            <label for="month" class="text-black font-monospace font-weight-bold lead mx-3">Moi</label>
+            <select class="form-select form-select-lg p-3 bg-white border border-3 rounded-pill" id="month" onchange="updateChart()">
+                <option value="0">Tous les mois</option>
+                {% for m in mois %}
+                <option value="{{ forloop.counter }}">{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 mb-5">
+            <label for="year" class="text-black font-monospace font-weight-bold lead mx-3">Année</label>
+            <select class="form-select form-select-lg p-3 bg-white border border-3 rounded-pill" id="year" onchange="updateChart()">
+                <option value="0">Toutes les années</option>
+                {% for annee in annees %}
+                <option value="{{ annee }}">{{ annee }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4" style="margin-top: 32px;">
+            <form action="{% url 'web:generate_execl_data' %}" method="post">
+                {% csrf_token %}
+                <input type="text" name="labels" id="labels" value="" hidden>
+                <input type="text" name="data" id="data" value="" hidden>
+                <button type="submit" class="btn bg-black text-white text-uppercase p-3 rounded-pill" >
+                    Imprimer
+                </button>
+            </form>
+        </div>
+    </div>
+    <div>
+        <canvas id="kt_chartjs_1" class="mh-400px"></canvas>
+    </div>
+</main>
+
+
+
+{% endblock conteneur %}
+
+
+{% block script %}
+<script src="{% static 'assets/js/template.js' %}"></script>
+
+<script src="{% static 'assets/plugins/global/plugins.bundle.js' %}"></script>
+
+
+
+
+<script type="text/javascript">
+    const data_week = {{ clients_by_week }};
+    const meta_data = {% autoescape off %} {{ meta_data }} {% endautoescape %};
+    const labels_input = document.getElementById('labels');
+    const data_input = document.getElementById('data');
+    console.log(data_week);
+    var ctx = document.getElementById('kt_chartjs_1');
+    // Define colors
+    {% comment %} var primaryColor = KTUtil.getCssVariableValue('--kt-primary');
+    var dangerColor = KTUtil.getCssVariableValue('--kt-danger');
+    var successColor = KTUtil.getCssVariableValue('--kt-success'); {% endcomment %}
+    var primaryColor = "blue";
+    var dangerColor = "red";
+    var successColor = "green";
+    // Define fonts
+    var fontFamily ="sans-serif";
+
+    // Chart data
+    let data = {
+        labels: meta_data,
+        datasets: [
+            {
+                label: 'Nombre de client',
+                data: data_week,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fill color
+                borderColor: 'rgba(75, 192, 192, 1)', // Border color
+                borderWidth: 1 // Border width
+            }
+        ]
+    };
+
+    // Chart config
+    let config = {
+        type: 'bar',
+        data: data,
+        options: {
+            plugins: {
+                title: {
+                    display: false,
+                }
+            },
+            responsive: true,
+            interaction: {
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true, 
+                    ticks: {
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : '';
+                        }
+                    }
+                }
+            }
+        },
+        defaults:{
+            global: {
+                defaultFont: fontFamily
+            }
+        }
+    };
+
+    var myChart = new Chart(ctx, config);
+
+
+    let filteredData = data_week;
+    let labels = meta_data;
+
+    labels_input.value = labels;
+    data_input.value = filteredData;
+
+    function updateChart() {
+        const selectedMonth = document.getElementById('month').value;
+        const selectedYear = document.getElementById('year').value;
+
+        if (selectedMonth !== '0' && selectedYear !== '0') {
+            filteredData = data_week.filter((value, index) => {
+            const date = new Date(meta_data[index]);
+            return date.getMonth() + 1 == selectedMonth && date.getFullYear() == selectedYear;
+            });
+        } else {
+            filteredData = data_week;
+        }
+
+        // Mettre à jour les étiquettes en fonction des filtres
+        labels = selectedMonth != '0' ? meta_data.filter((date, index) => {
+            const month = new Date(date).getMonth() + 1;
+            return month == selectedMonth;
+        }) : meta_data;
+
+        // Mettre à jour le graphique
+        myChart.data.labels = labels;
+        myChart.data.datasets[0].data = filteredData;
+        labels_input.value = labels;
+        data_input.value = filteredData;
+        myChart.update();
+    }
+</script>
+
+
+
+
+
+
+
+{% endblock script %}

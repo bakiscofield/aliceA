@@ -1,0 +1,102 @@
+{% load static %}
+{% load django_browser_reload %}
+
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Alice Bot</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Favicon-->
+    <!-- project css file  -->
+    <link rel="stylesheet" href="{% static 'assets/css/my-task.style.min.css' %}">
+    <style>
+        .dataTables_filter {
+            display: flex;
+            flex-direction: row;
+            justify-content: end;
+        }
+
+        .dataTables_filter label {
+            width: 75%;
+        }
+
+        .dataTables_filter label input {
+            background: white;
+            padding: 6px;
+            border: solid gray 1px;
+        }
+
+        .dataTables_length select {
+            background: white;
+            padding: 6px;
+            width: 48px;
+            border: solid gray 1px;
+        }
+
+        .dataTables_paginate {
+            display: flex;
+            flex-direction: row;
+            justify-content: end;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="mytask-layout" class="theme-indigo">
+    
+    <!-- sidebar -->
+    {% include "layouts/partials/sidebar.html" %}
+
+    <!-- main body area -->
+    <div class="main px-lg-4 px-md-4">
+
+        <!-- Body: Header -->
+        {% include "layouts/partials/hearder.html" %}
+
+        <!-- Body: Body -->
+        <div class="body d-flex py-3">
+            {% block conteneur %}{% endblock conteneur %}
+        </div> 
+
+
+    </div>
+</div>
+
+<!-- Jquery Core Js -->
+<script src="{% static 'assets/bundles/libscripts.bundle.js' %}"></script>
+
+<!-- Plugin Js-->
+<script src="{% static 'assets/bundles/apexcharts.bundle.js' %}"></script>
+
+<!-- Jquery Page Js -->
+<script src="{% static 'assets/js/template.js' %}"></script>
+<script src="{% static 'assets/js/page/hr.js' %}"></script>
+<script src="{% static 'assets/js/sweet_alert.js' %}"></script>
+<script src="{% static 'assets/bundles/dataTables.bundle.js' %}"></script>
+<script>
+    function stopEvent(){
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    function showDialog(icon, title, message){
+        Swal.fire({
+            icon: icon,
+            title: title.toUpperCase(),
+            text: message,
+            confirmButtonColor: "#5179d6",
+        });
+    }
+
+  </script>
+  {% block script %}
+  
+  {% endblock script %}
+
+  {% django_browser_reload_script %}
+</body>
+</html> 

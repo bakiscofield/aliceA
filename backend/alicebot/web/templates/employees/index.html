@@ -1,0 +1,54 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block conteneur %}
+<div class="">
+    <div class="row align-items-center">
+        <div class="">
+            <div class="card-header py-3 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
+                <h3 class="fw-bold mb-0">Personnel</h3>
+                <div class="col-auto d-flex w-sm-100">
+                    <button 
+                        id="btn_add"
+                        type="button" 
+                        class="btn bg-danger text-white p-3 rounded-pill" 
+                        >
+                        <i class="icofont-plus-circle me-2 fs-6"></i>
+                        Ajouter employée
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- Row end  -->
+    <div>
+        <div class="card mb-3 w-100">
+            <div class="card-body w-100">
+                <table id="model_data" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prenom</th>
+                            <th>Contact</th> 
+                            <th>Username</th> 
+                            <th>Role</th>   
+                            <th>Status</th>  
+                            <th>Actions</th>  
+                        </tr>
+                    </thead>
+                    <tbody>
+                       
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="create_or_edit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
+      <div class="modal-content">
+      </div>
+    </div>
+</div>
+{% endblock conteneur %}
+{% block script %}
+{% include "employees/crud.html" %}
+{% endblock script %}

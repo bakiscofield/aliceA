@@ -1,0 +1,283 @@
+<script>
+    
+    const BASE_ORIGIN = window.location.origin;
+    const API_BASE_ENDPOINT = BASE_ORIGIN+"/api/";
+    const WEB_BASE_ENDPOINT = BASE_ORIGIN+"/web/";
+
+    const EMPLOYEES_BASE_ENDPOINT = API_BASE_ENDPOINT+"employees";
+    const EMPLOYEES_GET_ENDPOINT = EMPLOYEES_BASE_ENDPOINT+"/get";
+    const EMPLOYEES_CREATE_ENDPOINT = EMPLOYEES_BASE_ENDPOINT+"/create";
+    const EMPLOYEES_UPDATE_ENDPOINT = EMPLOYEES_BASE_ENDPOINT+"/update";
+    const EMPLOYEES_DELETE_ENDPOINT = EMPLOYEES_BASE_ENDPOINT+"/delete";
+    const EMPLOYEES_ENABLE_ENDPOINT = EMPLOYEES_BASE_ENDPOINT + "/enable";
+    const EMPLOYEES_DISABLE_ENDPOINT = EMPLOYEES_BASE_ENDPOINT + "/disable";
+
+    
+    const EMPLOYEES_CREATE_OR_EDIT_ENDPOINT = WEB_BASE_ENDPOINT+"employees/create/or/edit";
+
+    const modal_form_tag = $("#create_or_edit"); 
+    const modal_form = new bootstrap.Modal(modal_form_tag); 
+
+    const btn_add_tag = $("#btn_add"); 
+     
+    const csrftoken = getCookie('csrftoken');
+
+    function generateActionMenu(id, enable) {
+        let state_html = ``;
+        if (enable==true){
+            state_html = `
+                <button type="button" class="btn btn-outline-secondary " 
+                    onclick="show_dialog_change_state_object('${EMPLOYEES_DISABLE_ENDPOINT}', ${id}, 'Voulez vous vraiment désactiver cet employé ? ')"> <!-- Appelle la fonction pour activer/désactiver -->
+                    <i class="icofont-close text-danger icofont-2x"></i>
+                </button>
+            `;
+        } else {
+            state_html = `
+                <button type="button" class="btn btn-outline-secondary " 
+                    onclick="show_dialog_change_state_object('${EMPLOYEES_ENABLE_ENDPOINT}', ${id}, 'Voulez vous vraiment activer cet employé ? ')"> <!-- Appelle la fonction pour activer/désactiver -->
+                    <i class="icofont-check text-success icofont-2x"></i>
+                </button>
+            `;
+        }
+        return `
+            <div class="btn-group" role="group" aria-label="Basic outlined example">
+                <!-- Bouton pour éditer, déclenche le modal -->
+                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edittickit" onclick="show_edit_form(${id})">
+                    <i class="icofont-edit text-success"></i>
+                </button>
+                <!-- Bouton pour supprimer, avec une classe 'deleterow' -->
+                <button type="button" class="btn btn-outline-secondary deleterow" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deletetickit" 
+                        onclick="show_dialog_delete_object(${id}, 'Voulez vous vraiment supprimer cet employée ?')">
+                    <i class="icofont-ui-delete text-danger"></i>
+                </button>
+                ${state_html}
+            </div>
+        `;
+    }
+    
+
+
+    let datatable = function () {
+        // Variables partagées
+        let table;
+        let dt;
+
+        // Fonctions privées
+        let initDatatable = function () {
+            dt = $("#model_data").DataTable();
+            $.ajax({
+                url: `${EMPLOYEES_BASE_ENDPOINT}`,
+                type: 'get',
+                dataType: 'json',
+                success: function (employees) {
+                    //console.log(employees);
+                    employees.forEach(function (employee) {
+                        let enableText = employee.enable ?  '<span class="badge bg-success">actif</span>' 
+                        : '<span class=" badge bg-danger";">inactif</span>';
+    
+                        let new_row = dt.row.add([
+                            employee.nom,
+                            employee.prenom,
+                            employee.contact,
+                            employee.username,
+                            employee.groups,
+                            enableText,
+                            generateActionMenu(employee.id, employee.enable),
+                        ]).draw().node();
+                    });
+                },
+            })
+        }
+
+        let refreshDataTable = function() {
+            dt.clear().draw();
+            initDatatable();
+        }
+
+        // Suppression de ligne
+        var handleSearchDatatable = function () {
+            $('#input_table_filter').on('keyup', function (e) {
+                dt.search(e.target.value).draw();
+            });
+        }
+
+        // Méthodes publiques
+        return {
+            init: function () {
+                initDatatable();
+                handleSearchDatatable();
+            },
+            refresh: function () {
+                refreshDataTable();
+            }
+        }
+    }();
+
+    window.onload = () => {datatable.init();}
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    btn_add_tag.on('click', () => {
+        $.ajax({
+            url: EMPLOYEES_CREATE_OR_EDIT_ENDPOINT,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: () => {
+                modal_form.hide();
+            },
+            success: function (data) {
+                modal_form_tag.find(".modal-content").html(data.html_form);
+                modal_form.show();
+                store_or_update_object(EMPLOYEES_CREATE_OR_EDIT_ENDPOINT);
+            }
+        });
+    });
+
+    function store_or_update_object(url){
+        let form = modal_form_tag.find("form");
+        form.on('submit', ()=>{
+            stopEvent();   
+            $.ajax({
+                url: url,
+                type: form.attr("method"),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    stopEvent(); 
+                    if (data.form_is_valid){
+                        if ("message" in data) {
+                            datatable.refresh();
+                            let icon = "success";
+                            let title = "Succès";
+                            let message = data["message"];
+                            modal_form.hide();
+                            showDialog(icon, title, message);
+                        }
+                    } else {
+                        modal_form_tag.find(".modal-content").html(data.html_form);
+                        store_or_update_object(url);
+                    }
+                }
+            });
+        
+        })
+    }
+    
+    function show_edit_form(id){
+        let url = EMPLOYEES_CREATE_OR_EDIT_ENDPOINT+"/"+id;
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: () => {
+                modal_form.hide();
+            },
+            success: function (data) {
+                modal_form_tag.find(".modal-content").html(data.html_form);
+                modal_form.show();
+                store_or_update_object(url);
+            }
+        });
+    }
+
+
+    function show_dialog_change_state_object(url, id, message){
+        let title = "Êtes vous sur !";
+
+        Swal.fire({
+            icon: "warning",
+            title: title,
+            text: message,
+            showConfirmButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonColor: "#F8285A",
+        }).then((response) => {
+            if (response.isConfirmed) {
+                url = url+"/"+id
+                request_config = {
+                    url: url,
+                    method: "PUT",
+                    data: {},
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                }
+                make_request(request_config);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    
+    function show_dialog_delete_object(id, message){
+        let title = "Êtes vous sur !";
+
+        Swal.fire({
+            icon: "warning",
+            title: title,
+            text: message,
+            showConfirmButton: true,
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonColor: "#F8285A",
+        }).then((response) => {
+            if (response.isConfirmed) {
+                url = EMPLOYEES_DELETE_ENDPOINT+"/"+id
+                request_config = {
+                    url: url,
+                    method: "DELETE",
+                    data: {},
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                }
+                make_request(request_config);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+
+    function make_request({url, method, data, headers}){
+        $.ajax({
+            url: url,
+            type: method,
+            dataType: 'json',
+            headers: headers,
+            success: (data) => {
+                let icon = data.icon;
+                let title = data.title;
+                let message =  data.message;
+                showDialog(icon, title, message);
+                datatable.refresh();
+            },
+            error: (xhr, status, error) => {
+                console.log(xhr?.responseJSON);
+            }
+        });        
+    }
+
+
+
+
+
+
+</script>

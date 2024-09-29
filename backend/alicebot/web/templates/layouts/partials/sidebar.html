@@ -1,0 +1,66 @@
+<div class="sidebar bg-black px-4 py-4 py-md-5 me-0">
+    <div class="d-flex flex-column h-100">
+        <a href="index.html" class="mb-0 brand-icon">
+            <span class="logo-icon">
+                <svg  width="35" height="35" fill="currentColor" class="bi bi-clipboard-check" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                </svg>
+            </span>
+            <span class="logo-text">ALICE BOT</span>
+        </a>
+        <!-- Menu: main ul -->
+
+        <ul class="menu-list flex-grow-1 mt-3">
+            <li class="collapsed">
+                <a class="m-link" 
+                    href="{% url 'dashboard' %}">
+                    <i class="icofont-home fs-5"></i> 
+                    <span>Dashboard</span> 
+                </a>
+            </li>
+            <li class="collapsed">
+                <a class="m-link "  
+                    href="{% url 'web:employees' %}">
+                    <i class="icofont-home fs-5"></i> 
+                    <span>Employés</span> 
+                </a>
+            </li>
+            <li class="collapsed">
+                <a class="m-link" 
+                    href="{% url 'web:caisses' %}">
+                    <i class="icofont-home fs-5"></i> 
+                    <span>Caisses</span> 
+                </a>
+            </li>
+            <!-- <li  class="collapsed">
+                <a class="m-link"  data-bs-toggle="collapse" data-bs-target="#project-Components" href="#">
+                    <i class="icofont-briefcase"></i><span>Projects</span> <span class="arrow icofont-dotted-down ms-auto text-end fs-5"></span></a>
+                < !-- Menu: Sub menu ul -- >
+                <ul class="sub-menu collapse" id="project-Components">
+                    <li><a class="ms-link" href="projects.html"><span>Projects</span></a></li>
+                    <li><a class="ms-link" href="task.html"><span>Tasks</span></a></li>
+                    <li><a class="ms-link" href="timesheet.html"><span>Timesheet</span></a></li>
+                    <li><a class="ms-link" href="team-leader.html"><span>Leaders</span></a></li>
+                </ul>
+            </li> -->
+            
+        </ul>
+        <ul>
+            <a class="m-link active text-white" data-bs-toggle="collapse" data-bs-target="#dashboard-Components" href="#">
+               <div class="d-flex">
+                    <div class="">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z"/>
+                            <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
+                        </svg> 
+                    </div>
+                    <div class="mx-3">
+                        <span>Se déconnecter</span>
+                    </div>
+               </div>
+            </a>
+        </ul>
+    </div>
+</div>

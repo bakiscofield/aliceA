@@ -1,0 +1,41 @@
+{% load crispy_forms_tags %}
+
+<form method="POST">
+  {% csrf_token %}
+  {{ form.errors }}
+  <div class="modal-header">
+    <h5 class="modal-title fw-bold" id="personneModalLabel">Ajouter un employé</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      {{ form.id_chat|as_crispy_field }}
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        {{ form.nom|as_crispy_field }}
+      </div>
+      <div class="col-md-6">
+        {{ form.prenom|as_crispy_field }}
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-7">
+        {{ form.contact|as_crispy_field }}
+      </div>
+      <div class="col-md-5">
+        {{ form.username|as_crispy_field }}
+      </div>
+    </div>
+    <div class="mb-3">
+      {{ form.country|as_crispy_field }}
+    </div>
+    <div class="mb-3">
+      {{ form.groups|as_crispy_field }}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+    <button type="submit" class="btn btn-primary" id="savePersonne">Enregistrer</button>
+  </div>
+</form>

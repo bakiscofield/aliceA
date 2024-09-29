@@ -1,0 +1,16 @@
+gunicorn
+asgiref==3.8.1
+django
+sqlparse==0.5.1
+typing_extensions==4.12.2
+requests
+django-extensions
+django-rest-framework
+faker
+python-telegram-bot==20.3
+django-crispy-forms 
+crispy-bootstrap5
+django-rest-framework
+django-browser-reload
+django-cors-headers
+openpyxl

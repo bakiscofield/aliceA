@@ -1,0 +1,110 @@
+<div class="modal fade" id="caissemodale" tabindex="-1"  aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md modal-dialog-scrollable">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title  fw-bold" id="leaveaddLabel"> Tickit Add</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+         
+            <div class="deadline-form">
+                <form method="post"  action="{% url 'web:add_employe_payement' %}">
+
+                    
+                    
+                  {% csrf_token %}
+                    <div class="row g-3 mb-3">
+
+                        <div class="col">
+                          {% comment %} <label for="depone" class="form-label"> Nom: </label>
+                          <input type="text" class="form-control" id="depone"> {% endcomment %}
+
+                          {{ form.employe.label_tag }}
+                          {{ form.employe }}
+                          {{ form.employe.errors }}
+
+                          
+                        </div>
+  
+  
+                        <div class="col">
+                          {% comment %} <label for="depone" class="form-label"> prenom: </label>
+                          <input type="text" class="form-control" id="depone"> {% endcomment %}
+                          {{ form.code_agent.label_tag }}
+                          {{ form.code_agent }}
+                          {{ form.code_agent.errors }}
+                        </div>
+                      </div>
+
+                    <div class="row g-3 mb-3">
+
+                      <div class="col">
+                        {% comment %} <label for="depone" class="form-label"> chat_id: </label>
+                        <input type="text" class="form-control" id="depone"> {% endcomment %}
+                        {{ form.payement.label_tag }}
+                        {{ form.payement }}
+                        {{ form.payement.errors }}
+                      </div>
+
+                      <div class="col">
+                      {{ form.frais_commission.label_tag }}
+                      {{ form.frais_commission }}
+                      {{ form.frais_commission.errors }}
+                    </div>
+                  </div>
+
+
+                    <div class="row g-3 mb-3">
+
+                      <div class="col">
+                        {% comment %} <label for="depone" class="form-label"> Contact: </label>
+                        <input type="text" class="form-control" id="depone"> {% endcomment %}
+                          {{ form.bookmaker.label_tag }}
+                          {{ form.bookmaker }}
+                          {{ form.bookmaker.errors }}
+                      </div>
+
+                      <div class="col">
+                        {% comment %} <label for="depone" class="form-label"> chat_id: </label>
+                        <input type="text" class="form-control" id="depone"> {% endcomment %}
+                        {{ form.ville.label_tag }}
+                        {{ form.ville }}
+                        {{ form.ville.errors }}
+
+                      </div>
+
+
+
+                    </div>
+                
+                   
+                    <div class="row g-3 mb-3">
+
+                
+                      <div class="col">
+                        {% comment %} <label for="depone" class="form-label"> chat_id: </label>
+                        <input type="text" class="form-control" id="depone"> {% endcomment %}
+                        {{ form.etablissement.label_tag }}
+                        {{ form.etablissement }}
+                        {{ form.etablissement.errors }}
+
+                      </div>
+
+
+                      <div class="col">
+                        {{ form.rue.label_tag }}
+                        {{ form.rue }}
+                        {{ form.rue.errors }}
+                      </div>
+
+
+
+                    </div>
+                <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">sent</button>
+      </div>
+      </form>
+       
+    </div>
+    </div>
+</div>

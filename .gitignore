@@ -1,0 +1,9 @@
+.venv
+**.env
+**db.sqlite3
+**git.sh
+**__pycache__**
+**static**
+**/media/out/**
+**/media/pdf**
+**/migrations/**
